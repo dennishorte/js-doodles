@@ -1,0 +1,15 @@
+<html>
+<head>
+  <script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
+</head>
+<body>
+  <h1>Chart</h1>
+
+  <script src="RiskCombat.js"></script>
+  <script>
+    var result = Risk.simulate(4, 4, 6, 6, 10000);
+    console.log(result);
+    Risk.render(result);
+  </script>
+</body>
+</html>
