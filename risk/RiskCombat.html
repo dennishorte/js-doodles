@@ -5,11 +5,12 @@
 <body>
   <h1>Chart</h1>
 
+  <div id="chart-holder"></div>
+
   <script src="RiskCombat.js"></script>
   <script>
-    var result = Risk.simulate(4, 4, 6, 6, 10000);
-    console.log(result);
-    Risk.render(result);
+    var result = Risk.simulate(13, 5, 6, 6, 10000);
+    Risk.render('chart-holder', result);
   </script>
 </body>
 </html>
