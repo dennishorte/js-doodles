@@ -90,7 +90,7 @@
         return result;
     };
 
-    Risk.render = function(result) {
+    Risk.render = function(location_id, result) {
 
         // Process the data.
 
@@ -116,29 +116,31 @@
 
         // Normalize the data.
         var data = [];
+        var sum = 0;
         for (var i = max_defend_key; i > 0; i--) {
             var value = i in result.defender ? result.defender[i] : 0;
+            sum += value;
             data.push({
                 count: value / result.count,
+                sum: sum / result.count,
                 label: 'd+' + i
             });
-            // data.push(value);
         }
+        sum = result.count - sum;
         for (var i = 1; i <= max_attack_key; i++) {
             var value = i in result.attacker ? result.attacker[i] : 0;
+            sum -= value;
             data.push({
                 count: value / result.count,
+                sum: sum / result.count,
                 label: 'a+' + i
             });
-            // data.push(value);
         }
-
-        console.log(data);
 
 
         // Insert the style for the chart.
 
-        d3.select('body').append('style').text(
+        d3.select('#' + location_id).append('style').text(
             '.chart rect { stroke: white; }\n' +
             '.chart .attacker { fill: red; }\n' +
             '.chart .defender { fill: steelblue; }'
@@ -147,14 +149,16 @@
 
         // Generate the chart.
 
-        var height = 400;
+        var bar_height = 400;
+        var label_height = 20;
+        var chart_height = bar_height + label_height;
         var bar_width = 30;
         var width = data.length * bar_width;
 
         var chart = d3.select('body').append('svg')
             .attr('class', 'chart')
             .attr('width', width)
-            .attr('height', height);
+            .attr('height', chart_height);
 
         var x = d3.scale.linear()
             .domain([0, data.length])
@@ -162,14 +166,14 @@
 
         var y = d3.scale.linear()
             .domain([0, 1])
-            .range([0, height]);
+            .range([0, bar_height]);
 
         chart.selectAll('rect')
             .data(data)
           .enter().append('rect')
             .attr('x', function(d, i) { return x(i); })
-            .attr('y', function(d) { return height / 2 - y(d.count) })
-            .attr('height', function(d) { return y(d.count) })
+            .attr('y', function(d) { return bar_height - y(d.sum) })
+            .attr('height', function(d) { return y(d.sum) })
             .attr('width', bar_width)
             .attr('class', function(d, i) { return i < max_defend_key ? 'defender' : 'attacker' });
 
@@ -177,17 +181,17 @@
             .data(data)
           .enter().append('svg:text')
             .attr('x', function(d, i) { return x(i) + bar_width / 2; })
-            .attr('y', function(d) { return height / 2 - y(d.count) })
+            .attr('y', function(d) { return bar_height - y(d.sum) })
             .attr('style', 'font-size: 12; font-family: Helvetica, sans-serif')
             .attr('text-anchor', 'middle')
-            .text(function(d) { return percent_format(d.count); })
+            .text(function(d) { return percent_format(d.sum); })
             .attr('fill', 'black');
 
         chart.selectAll('text.yaxis')
             .data(data)
           .enter().append('svg:text')
             .attr('x', function(d, i) { return x(i) + bar_width / 2; })
-            .attr('y', height / 2 + 10)
+            .attr('y', bar_height + 15)
             .attr('style', 'font-size: 12; font-family: Helvetica, sans-serif')
             .attr('text-anchor', 'middle')
             .text(function(d) { return d.label; })
